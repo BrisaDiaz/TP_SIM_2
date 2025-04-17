@@ -62,7 +62,7 @@ class PruebaChiCuadrado:
                         frecuencias[intervalo] += 1
 
                 i += 1
-        print(sum(frecuencias.values()))
+
         return frecuencias
 
     def _calcular_estadistico(self, frecuencia_observada, frecuencia_esperada, frecuencia_esperada_minima=5):

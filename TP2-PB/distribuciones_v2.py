@@ -97,8 +97,8 @@ class Poisson(Distribucion):
             prob = 0.0
 
             # Sumar las probabilidades para todos los enteros en el intervalo
-            k_start = math.ceil(limite_inf) if not math.isinf(limite_inf) else 0
-            k_end = math.ceil(limite_sup) if not math.isinf(limite_sup) else 100  # Límite práctico
+            k_start = math.ceil(limite_inf)
+            k_end = math.ceil(limite_sup)
 
             for k in range(k_start, k_end):
                 prob += self._pmf(k)

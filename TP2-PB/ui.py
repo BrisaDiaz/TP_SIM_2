@@ -38,12 +38,17 @@ def mostrar_tabla(resultado_prueba, nombre_distribución):
     print(f"{'Intervalo':<20} | {'FO':<10} | {'FE':<10} | {'Chi^2':<10}")
     print("-" * 60)
 
+    cantidad_intervalos = len(resultado_prueba['intervalos'])
+    ultimo_intervalo = list(resultado_prueba['intervalos'].keys())[cantidad_intervalos-1]
 
     for intervalo,datos in resultado_prueba['intervalos'].items():
         lim_inf = f"{intervalo[0]:.2f}"
         lim_sup = f"{intervalo[1]:.2f}"
+        if intervalo == ultimo_intervalo:
+            etiqueta_intervalo = f"[{lim_inf}, {lim_sup}]"
+        else:
+            etiqueta_intervalo = f"[{lim_inf}, {lim_sup})"
 
-        etiqueta_intervalo = f"[{lim_inf}, {lim_sup})"
         fo = f"{datos['frecuencia_observada']:.2f}"
         fe = f"{datos['frecuencia_esperada']:.2f}"
         chi_cuadrado_intervalo = f"{datos['estadistico_chi_cuadrado']:.2f}"
@@ -55,7 +60,7 @@ def mostrar_tabla(resultado_prueba, nombre_distribución):
     sumatoria_fe = f"{resultado_prueba['sumatoria_frecuencia_esperada']:.2f}"
     chi_calculado = f"{resultado_prueba['chi_calculado']:.2f}"
     chi_tabulado = f"{resultado_prueba['chi_tabulado']:.2f}"
-    cantidad_intervalos = len(resultado_prueba['intervalos'])
+
     aprueba =  resultado_prueba['aprueba_hipotesis_nula']
     print(f"{"":<20} | {sumatoria_f0:<10} | {sumatoria_fe:<10} | {chi_calculado:<10}")
     print("=" * 60)

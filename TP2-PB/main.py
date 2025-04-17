@@ -1,6 +1,6 @@
 from TP2_PA.generadores import GeneradorExponencial, GeneradorUniforme, GeneradorPoisson, GeneradorNormal
 from prueba_chi_cuadrado import  PruebaChiCuadrado
-from distribuciones import Uniforme, Normal, Exponencial, Poisson
+from distribuciones_v2 import Uniforme, Normal, Exponencial, Poisson
 
 from ui import generar_histograma, mostrar_tabla
 
