@@ -49,21 +49,26 @@ class PruebaChiCuadrado:
 
     def _calcular_frecuencia_observada(self, numeros, intervalos):
         frecuencias = {intervalo: 0 for intervalo in intervalos}
-        indice_ultimo_intervalo = len(intervalos) - 1
 
-        i = 0
         for numero in numeros:
-            for intervalo in intervalos:
+            asignado = False
+            for i, intervalo in enumerate(intervalos):
                 limite_inf, limite_sup = intervalo
 
-                if i == indice_ultimo_intervalo:
-                    if limite_inf <= numero <= limite_sup:
-                        frecuencias[intervalo] += 1
-                else:
+                # Para todos los intervalos excepto el último, la condición es < limite_sup
+                if i < len(intervalos) - 1:
                     if limite_inf <= numero < limite_sup:
                         frecuencias[intervalo] += 1
-
-                i += 1
+                        asignado = True
+                        break  # Importante: salir del bucle de intervalos una vez asignado
+                # Para el último intervalo, la condición es <= limite_sup (incluyendo el máximo)
+                else:
+                    if limite_inf <= numero <= limite_sup:
+                        frecuencias[intervalo] += 1
+                        asignado = True
+                        break  # Importante: salir del bucle de intervalos una vez asignado
+            if not asignado:
+                print(f"¡Advertencia! Número {numero} no asignado a ningún intervalo.")
 
         return frecuencias
 
