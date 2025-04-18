@@ -75,7 +75,7 @@ def mostrar_tabla(resultado_prueba, nombre_distribución):
         if aprueba:
             print("\033[92mNo se rechaza la Hipótesis Nula\033[0m")  # Verde para éxito
         else:
-            print("\033[91mNo se aprueba la Hipótesis Nula\033[0m")  # Rojo para fracaso
+            print("\033[91mSe rechaza la Hipótesis Nula\033[0m")  # Rojo para fracaso
     else:
         print("No se pudo determinar si se aprueba la Hipótesis Nula.")
 
