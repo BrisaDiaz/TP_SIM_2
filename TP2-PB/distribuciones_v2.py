@@ -57,10 +57,6 @@ class Normal(Distribucion):
         self.mu = mu
         self.sigma = sigma
 
-    def _pdf(self, x):
-        """Función de densidad de probabilidad"""
-        return (1 / (self.sigma * math.sqrt(2 * math.pi))) * math.exp(-0.5 * ((x - self.mu) / self.sigma) ** 2)
-
     def _cdf(self, x):
          """Función de distribución acumulada para normal"""
          return stats.norm.cdf(x, loc=self.mu, scale=self.sigma)
