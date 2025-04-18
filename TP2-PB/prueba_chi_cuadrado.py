@@ -90,7 +90,17 @@ class PruebaChiCuadrado:
         """
         estadisticos_por_intervalo = {}
         observada_fusionada = frecuencia_observada.copy()
-        esperada_fusionada = frecuencia_esperada.copy()
+        esperada_fusionada_original = frecuencia_esperada.copy()  # Guardar las frecuencias esperadas originales
+
+        # Normalizar la frecuencia esperada para que sume igual a la observada
+        suma_observada = sum(observada_fusionada.values())
+        suma_esperada_original = sum(esperada_fusionada_original.values())
+
+        if suma_esperada_original > 0:
+            factor_normalizacion = suma_observada / suma_esperada_original
+            esperada_fusionada = {k: v * factor_normalizacion for k, v in esperada_fusionada_original.items()}
+        else:
+            esperada_fusionada = esperada_fusionada_original.copy()  # Evitar división por cero
 
         # Convertir los diccionarios a listas de tuplas para facilitar el procesamiento
         intervalos = list(observada_fusionada.keys())
