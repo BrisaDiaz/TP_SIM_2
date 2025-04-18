@@ -34,15 +34,17 @@ class PruebaChiCuadrado:
         amplitud = rango / cant_intervalos
         return amplitud
 
-    def _definir_intervalos(self, val_min, val_max, amplitud_intervalos):
+    def _definir_intervalos(self, val_min, val_max, num_intervalos, amplitud_intervalos):
         lista_intervalos = []
-        limite_sup = val_min
+        limite_inf = val_min
 
-        while limite_sup < val_max:
-            limite_inf = limite_sup
+        for i in range(num_intervalos):
             limite_sup = limite_inf + amplitud_intervalos
+            if i == num_intervalos - 1:
+                limite_sup = val_max # Asegurar que el último intervalo llegue hasta el máximo
             intervalo = (limite_inf, limite_sup)
             lista_intervalos.append(intervalo)
+            limite_inf = limite_sup
         return lista_intervalos
 
     def _calcular_frecuencia_observada(self, numeros, intervalos):
@@ -203,7 +205,7 @@ class PruebaChiCuadrado:
                 cant_intervalos = cant_calc_intervalos
 
         amplitud_intervalos = self._calcular_amplitud_intervalo(val_min, val_max, cant_intervalos)
-        intervalos = self._definir_intervalos(val_min, val_max, amplitud_intervalos)
+        intervalos = self._definir_intervalos(val_min, val_max, cant_intervalos, amplitud_intervalos)
         frecuencia_observada = self._calcular_frecuencia_observada(numeros, intervalos)
         frecuencia_esperada = self.distribucion.calcular_frecuencia_esperada(intervalos, numeros)
         estadisticos_por_intervalo, observada_fusionada, esperada_fusionada = self._calcular_estadistico(
