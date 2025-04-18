@@ -183,7 +183,7 @@ class PruebaChiCuadrado:
 
     def _obtener_chi_cuadrado_tabulado(self, grados_libertad):
         try:
-            return chi2.isf(self.nivel_confianza, grados_libertad)
+            return chi2.ppf(self.nivel_confianza, grados_libertad)
         except ValueError:
             print(f"Error: Grados de libertad ({grados_libertad}) no válidos.")
             return None
