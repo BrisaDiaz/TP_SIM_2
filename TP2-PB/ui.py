@@ -39,21 +39,24 @@ def mostrar_tabla(resultado_prueba, nombre_distribución):
     print("-" * 60)
 
     cantidad_intervalos = len(resultado_prueba['intervalos'])
-    ultimo_intervalo = list(resultado_prueba['intervalos'].keys())[cantidad_intervalos-1]
-
-    for intervalo,datos in resultado_prueba['intervalos'].items():
-        lim_inf = f"{intervalo[0]:.2f}"
-        lim_sup = f"{intervalo[1]:.2f}"
-        if intervalo == ultimo_intervalo:
-            etiqueta_intervalo = f"[{lim_inf}, {lim_sup}]"
+    ultimo_intervalo = list(resultado_prueba['intervalos'].keys())[-1]
+    for intervalo, datos in resultado_prueba['intervalos'].items():
+        # Etiqueta para Poisson o casos etiquetados como string
+        if isinstance(intervalo, (int, str)):
+            etiqueta_intervalo = str(intervalo)
+        # Etiqueta para distribuciones continuas con tuplas numéricas
         else:
-            etiqueta_intervalo = f"[{lim_inf}, {lim_sup})"
+            lim_inf = f"{intervalo[0]:.2f}"
+            lim_sup = f"{intervalo[1]:.2f}"
+            if intervalo == ultimo_intervalo:
+                etiqueta_intervalo = f"[{lim_inf}, {lim_sup}]"
+            else:
+                etiqueta_intervalo = f"[{lim_inf}, {lim_sup})"
 
         fo = f"{datos['frecuencia_observada']:.2f}"
         fe = f"{datos['frecuencia_esperada']:.2f}"
         chi_cuadrado_intervalo = f"{datos['estadistico_chi_cuadrado']:.2f}"
         print(f"{etiqueta_intervalo:<20} | {fo:<10} | {fe:<10} | {chi_cuadrado_intervalo:<10}")
-
 
     print("-" * 60)
     sumatoria_f0 = f"{resultado_prueba['sumatoria_frecuencia_observada']:.2f}"
@@ -62,21 +65,21 @@ def mostrar_tabla(resultado_prueba, nombre_distribución):
     chi_tabulado = f"{resultado_prueba['chi_tabulado']:.2f}"
 
     aprueba =  resultado_prueba['aprueba_hipotesis_nula']
-    print(f"{"":<20} | {sumatoria_f0:<10} | {sumatoria_fe:<10} | {chi_calculado:<10}")
+    print(f"{'Total':<20} | {sumatoria_f0:<10} | {sumatoria_fe:<10} | {chi_calculado:<10}")
     print("=" * 60)
     print(f"Cantidad de intervalos: {cantidad_intervalos}")
     print(f"Chi-Cuadrado Calculado: {chi_calculado}")
-
     print(
         f"Chi-Cuadrado Tabulado (GL={resultado_prueba['grados_de_libertad']}, α={1 - resultado_prueba['nivel_confianza']:.2f}): {chi_tabulado}")
     print("=" * 60)
 
     if aprueba is not None:
         if aprueba:
-            print("\033[92mNo se rechaza la Hipótesis Nula\033[0m")  # Verde para éxito
+            print("\033[92mNo se rechaza la Hipótesis Nula\033[0m")
         else:
-            print("\033[91mSe rechaza la Hipótesis Nula\033[0m")  # Rojo para fracaso
+            print("\033[91mSe rechaza la Hipótesis Nula\033[0m")
     else:
         print("No se pudo determinar si se aprueba la Hipótesis Nula.")
 
     print("=" * 60)
+

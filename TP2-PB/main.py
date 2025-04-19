@@ -168,20 +168,31 @@ def programa_main():
 
         if 1<= int(opcion) <=4:
             mostrar_numeros_interactivo(numeros, 100, 5)
+            es_poisson = isinstance(distribution, Poisson)
 
             print('\n','*'*60)
             print(f"PRUEBA DE CHI CUADRADO")
             confianza = obtener_float_entre("Ingrese el nivel de confianza (1-99.95):", 1, 99.95)
             intervalo_prueba = None
-            respuesta_intervalos = input(
-                f"¿Desea especificar la cantidad de intervalos para la prueba de Chi Cuadrado? (s/n): ").lower()
-            if respuesta_intervalos == 's':
-                intervalo_prueba_usuario = obtener_entero_entre(
-                    f"Ingrese la cantidad de intervalos de la prueba (1-{cantidad}):", 1, cantidad)
-                intervalo_prueba = intervalo_prueba_usuario
+
+            if not es_poisson:
+                respuesta_intervalos = input(
+                    f"¿Desea especificar la cantidad de intervalos para la prueba de Chi Cuadrado? (s/n): ").lower()
+                if respuesta_intervalos == 's':
+                    intervalo_prueba_usuario = obtener_entero_entre(
+                        f"Ingrese la cantidad de intervalos de la prueba (1-{cantidad}):", 1, cantidad)
+                    intervalo_prueba = intervalo_prueba_usuario
 
             intervalo_grafico = obtener_entero_entre(f"Ingrese la cantidad de intervalos del historigrama (1-{cantidad}):", 1, cantidad)
-            resultado_prueba = PruebaChiCuadrado(distribution,confianza).realizar_prueba(numeros, cant_intervalos=intervalo_prueba)
+
+            prueba_chi = PruebaChiCuadrado(distribution, confianza)
+            resultado_prueba = None
+
+            if es_poisson:
+                resultado_prueba = prueba_chi.realizar_prueba_discreta_poisson(numeros, cant_intervalos=intervalo_prueba)
+            else:
+                resultado_prueba = prueba_chi.realizar_prueba(numeros, cant_intervalos=intervalo_prueba)
+
             mostrar_tabla(resultado_prueba, nombre_distribucion)
             generar_histograma(numeros, intervalo_grafico)
 

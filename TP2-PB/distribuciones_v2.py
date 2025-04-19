@@ -7,7 +7,7 @@ class Distribucion(ABC):
         pass
 
     @abstractmethod
-    def calcular_frecuencia_esperada(self, intervalos, numeros):
+    def calcular_frecuencia_esperada(self, intervalos, cantidad_total):
         pass
 
 
@@ -17,8 +17,7 @@ class Uniforme(Distribucion):
         self.a = a
         self.b = b
 
-    def calcular_frecuencia_esperada(self, intervalos, numeros):
-        cantidad_total = len(numeros)
+    def calcular_frecuencia_esperada(self, intervalos, cantidad_total):
         num_intervalos = len(intervalos)
         if num_intervalos > 0:
             frecuencia_esperada_por_intervalo = cantidad_total / num_intervalos
@@ -37,8 +36,7 @@ class Exponencial(Distribucion):
         """Función de distribución acumulada para exponencial"""
         return 1 - math.exp(-self.lambda_param * x)
 
-    def calcular_frecuencia_esperada(self, intervalos, numeros):
-        cantidad_total = len(numeros)
+    def calcular_frecuencia_esperada(self, intervalos, cantidad_total):
         frecuencias_esperadas = {}
 
         for intervalo in intervalos:
@@ -61,8 +59,7 @@ class Normal(Distribucion):
          """Función de distribución acumulada para normal"""
          return stats.norm.cdf(x, loc=self.mu, scale=self.sigma)
 
-    def calcular_frecuencia_esperada(self, intervalos, numeros):
-        cantidad_total = len(numeros)
+    def calcular_frecuencia_esperada(self, intervalos, cantidad_total):
         frecuencias_esperadas = {}
 
         for intervalo in intervalos:
@@ -77,29 +74,17 @@ class Normal(Distribucion):
 
 class Poisson(Distribucion):
     def __init__(self, media):
-        super().__init__()
-        self.lambda_param = media  # λ = media
+        self.media = media
 
     def _pmf(self, k):
-        """Función de masa de probabilidad para Poisson"""
-        return (math.exp(-self.lambda_param) * (self.lambda_param ** k)) / math.factorial(k)
+        if k < 0:
+            return 0
+        return (math.exp(-self.media) * (self.media ** k)) / math.factorial(k)
 
-    def calcular_frecuencia_esperada(self, intervalos, numeros):
-        cantidad_total = len(numeros)
+    def calcular_frecuencia_esperada(self, valores_unicos, cantidad_total):
         frecuencias_esperadas = {}
-
-        for intervalo in intervalos:
-            limite_inf, limite_sup = intervalo
-            prob = 0.0
-
-            # Sumar las probabilidades para todos los enteros en el intervalo
-            k_start = math.ceil(limite_inf)
-            k_end = math.ceil(limite_sup)
-
-            for k in range(k_start, k_end):
-                prob += self._pmf(k)
-
+        for valor in valores_unicos:
+            prob = self._pmf(valor)
             frecuencia_esperada = cantidad_total * prob
-            frecuencias_esperadas[intervalo] = frecuencia_esperada
-
+            frecuencias_esperadas[valor] = frecuencia_esperada
         return frecuencias_esperadas

@@ -1,5 +1,6 @@
 import math
 from scipy.stats import chi2
+from collections import Counter
 
 class PruebaChiCuadrado:
     def __init__(self, distribucion, nivel_confianza_porcentaje):
@@ -212,7 +213,7 @@ class PruebaChiCuadrado:
         amplitud_intervalos = self._calcular_amplitud_intervalo(val_min, val_max, cant_intervalos)
         intervalos = self._definir_intervalos(val_min, val_max, cant_intervalos, amplitud_intervalos)
         frecuencia_observada = self._calcular_frecuencia_observada(numeros, intervalos)
-        frecuencia_esperada = self.distribucion.calcular_frecuencia_esperada(intervalos, numeros)
+        frecuencia_esperada = self.distribucion.calcular_frecuencia_esperada(intervalos, cantidad_total)
         estadisticos_por_intervalo, observada_fusionada, esperada_fusionada = self._calcular_estadistico(
             frecuencia_observada, frecuencia_esperada, frecuencia_esperada_minima=5
         )
@@ -254,3 +255,120 @@ class PruebaChiCuadrado:
 
         return tabla_resultado
 
+    def _calcular_estadistico_discreto(self, frecuencia_observada, frecuencia_esperada, frecuencia_esperada_minima=5):
+        """
+        Calcula el estadístico chi-cuadrado para datos discretos, fusionando categorías
+        con frecuencia esperada menor que el mínimo requerido, añadiendo '+' al último intervalo.
+
+        Args:
+            frecuencia_observada (dict): Diccionario con los valores discretos como clave
+                                          y la frecuencia observada como valor.
+            frecuencia_esperada (dict): Diccionario con los valores discretos como clave
+                                         y la frecuencia esperada como valor.
+            frecuencia_esperada_minima (int): Frecuencia esperada mínima requerida
+                                               para cada categoría (por defecto es 5).
+
+        Returns:
+            tuple: Una tupla conteniendo:
+                   - estadisticos_fusionados (dict): Estadístico chi-cuadrado por categoría fusionada.
+                   - observada_fusionada (dict): Frecuencias observadas después de la fusión,
+                                                con etiquetas de categoría como clave.
+                   - esperada_fusionada (dict): Frecuencias esperadas después de la fusión,
+                                               con etiquetas de categoría como clave.
+        """
+        estadisticos_fusionados = {}
+        observada_fusionada_result = {}
+        esperada_fusionada_result = {}
+
+        # Normalizar las frecuencias esperadas
+        suma_observada = sum(frecuencia_observada.values())
+        suma_esperada_original = sum(frecuencia_esperada.values())
+        factor_normalizacion = suma_observada / suma_esperada_original if suma_esperada_original > 0 else 1
+        esperada_normalizada = {k: v * factor_normalizacion for k, v in frecuencia_esperada.items()}
+
+        claves_ordenadas = sorted(esperada_normalizada.keys())
+        num_claves = len(claves_ordenadas)
+        indice_clave = 0
+
+        fo_grupo = 0
+        fe_grupo = 0
+        inicio_grupo = None
+        claves_grupo = []
+        es_ultimo_grupo = False
+
+        while indice_clave < num_claves:
+            clave_actual = claves_ordenadas[indice_clave]
+            fo_actual = frecuencia_observada.get(clave_actual, 0)
+            fe_actual = esperada_normalizada[clave_actual]
+
+            if inicio_grupo is None:
+                inicio_grupo = clave_actual
+                claves_grupo.append(clave_actual)
+
+            fo_grupo += fo_actual
+            fe_grupo += fe_actual
+
+            if fe_grupo < frecuencia_esperada_minima and indice_clave < num_claves - 1:
+                claves_grupo.append(clave_actual)
+                indice_clave += 1
+                continue
+            else:
+                if inicio_grupo == clave_actual:
+                    etiqueta_grupo = str(inicio_grupo)
+                else:
+                    etiqueta_grupo = f"{min(claves_grupo)}-{max(claves_grupo)}"
+
+                # Añadir '+' al último intervalo
+                if indice_clave == num_claves - 1:
+                    etiqueta_grupo += "+"
+
+                observada_fusionada_result[etiqueta_grupo] = fo_grupo
+                esperada_fusionada_result[etiqueta_grupo] = fe_grupo
+                estadistico = (fo_grupo - fe_grupo) ** 2 / fe_grupo if fe_grupo > 0 else 0
+                estadisticos_fusionados[etiqueta_grupo] = estadistico
+
+                fo_grupo = 0
+                fe_grupo = 0
+                inicio_grupo = None
+                claves_grupo = []
+                indice_clave += 1
+
+        return estadisticos_fusionados, observada_fusionada_result, esperada_fusionada_result
+
+    def realizar_prueba_discreta_poisson(self, numeros, cant_intervalos=None):
+        # Agrupar las frecuencias observadas por valor discreto
+        frecuencia_observada_agrupada = Counter(numeros)
+        cantidad_total = len(numeros)
+        valores_unicos = sorted(frecuencia_observada_agrupada.keys())
+        frecuencia_esperada = self.distribucion.calcular_frecuencia_esperada(valores_unicos, cantidad_total)
+
+        estadisticos_por_grupo, observada_fusionada, esperada_fusionada = self._calcular_estadistico_discreto(
+            frecuencia_observada_agrupada, frecuencia_esperada, frecuencia_esperada_minima=5
+        )
+
+        grados_libertad = len(observada_fusionada) - 1
+        chi_cuadrado_tabulado = self._obtener_chi_cuadrado_tabulado(grados_libertad)
+        chi_cuadrado_calculado = sum(estadisticos_por_grupo.values())
+        aprueba = chi_cuadrado_calculado < chi_cuadrado_tabulado if chi_cuadrado_tabulado is not None else None
+
+        tabla_resultado = {
+            "intervalos": {},
+            "sumatoria_frecuencia_observada": sum(observada_fusionada.values()),
+            "sumatoria_frecuencia_esperada": sum(esperada_fusionada.values()),
+            "chi_calculado": chi_cuadrado_calculado,
+            "chi_tabulado": chi_cuadrado_tabulado,
+            "grados_de_libertad": grados_libertad,
+            "nivel_confianza": self.nivel_confianza,
+            "aprueba_hipotesis_nula": aprueba
+        }
+
+        for intervalo, fo in observada_fusionada.items():
+            fe = esperada_fusionada.get(intervalo, 0)
+            estadistico = estadisticos_por_grupo.get(intervalo, float('nan'))
+            tabla_resultado["intervalos"][intervalo] = {
+                "frecuencia_observada": fo,
+                "frecuencia_esperada": fe,
+                "estadistico_chi_cuadrado": estadistico
+            }
+
+        return tabla_resultado

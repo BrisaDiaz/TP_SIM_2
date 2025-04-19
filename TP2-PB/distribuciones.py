@@ -7,7 +7,7 @@ class Distribucion(ABC):
         pass
 
     @abstractmethod
-    def calcular_frecuencia_esperada(self, intervalos, numeros):
+    def calcular_frecuencia_esperada(self, intervalos, cantidad_total):
         pass
 
 class Uniforme(Distribucion):
@@ -16,8 +16,7 @@ class Uniforme(Distribucion):
         self.a = a
         self.b = b
 
-    def calcular_frecuencia_esperada(self, intervalos, numeros):
-        cantidad_total = len(numeros)
+    def calcular_frecuencia_esperada(self, intervalos, cantidad_total):
         frecuencias_esperadas = {}
         num_intervalos = len(intervalos)
         if num_intervalos > 0:
@@ -31,9 +30,9 @@ class Exponencial(Distribucion):
         super().__init__()
         self.media = media
 
-    def calcular_frecuencia_esperada(self, intervalos, numeros):
-        cantidad_total = len(numeros)
+    def calcular_frecuencia_esperada(self, intervalos, cantidad_total):
         frecuencias_esperadas = {}
+
         dist_esperada = stats.expon(scale=self.media)
         for intervalo in intervalos:
             limite_inf, limite_sup = intervalo
@@ -48,8 +47,7 @@ class Normal(Distribucion):
         self.mu = mu
         self.sigma = sigma
 
-    def calcular_frecuencia_esperada(self, intervalos, numeros):
-        cantidad_total = len(numeros)
+    def calcular_frecuencia_esperada(self, intervalos, cantidad_total):
         frecuencias_esperadas = {}
         dist_esperada = stats.norm(loc=self.mu, scale=self.sigma)
         for intervalo in intervalos:
@@ -61,23 +59,17 @@ class Normal(Distribucion):
 
 class Poisson(Distribucion):
     def __init__(self, media):
-        super().__init__()
         self.media = media
 
-    def calcular_frecuencia_esperada(self, intervalos, numeros):
-        cantidad_total = len(numeros)
+    def _pmf(self, k):
+        if k < 0:
+            return 0
+        return (math.exp(-self.media) * (self.media ** k)) / math.factorial(k)
+
+    def calcular_frecuencia_esperada(self, valores_unicos, cantidad_total):
         frecuencias_esperadas = {}
-        dist_esperada = stats.poisson(mu=self.media)
-        for intervalo in intervalos:
-            limite_inf, limite_sup = intervalo
-            probabilidad = 0
-
-            # Sumar las probabilidades para todos los enteros en el intervalo
-            k_start = math.ceil(limite_inf)
-            k_end = math.ceil(limite_sup)
-            for k in range(k_start, k_end + 1):
-                probabilidad += dist_esperada.pmf(k)
-
-            frecuencia_esperada = cantidad_total * probabilidad
-            frecuencias_esperadas[intervalo] = frecuencia_esperada
+        for valor in valores_unicos:
+            prob = self._pmf(valor)
+            frecuencia_esperada = cantidad_total * prob
+            frecuencias_esperadas[valor] = frecuencia_esperada
         return frecuencias_esperadas
