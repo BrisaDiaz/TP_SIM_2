@@ -62,32 +62,36 @@ def mostrar_numeros_interactivo(numeros, step=100, num_columnas=1):
                 print(formatted_num, end="")
                 if (i + 1 - start) % num_columnas == 0:
                     print()
+        opcionesMensaje = ("\n OPCIONES: \n"
+                    "a: Avanzar \n"
+                    "v: Volver \n"
+                    "s: Salir \n"
+                    "")
+        if n> step:
+            print(opcionesMensaje)
+            print()  # Nueva línea al final del bloque
+            opcion = input("Ingrese una opción (a/v/s): ").lower()
 
-        print()  # Nueva línea al final del bloque
 
-        print("\nOpciones:")
-        print("a: Avanzar")
-        print("v: Volver")
-        print("s: Salir")
-        opcion = input("Ingrese una opción (a/v/s): ").lower()
-
-        if opcion == 'a':
-            start += step
-            if start >= n:
-                print("Se ha llegado al final de la lista.")
+            if opcion == 'a':
+                start += step
+                if start >= n:
+                    print("Se ha llegado al final de la lista.")
+                    start -= step
+            elif opcion == 'v':
                 start -= step
-        elif opcion == 'v':
-            start -= step
-            if start < 0:
-                print("Se ha llegado al inicio de la lista.")
-                start = 0
-        elif opcion == 's':
-            break
-        else:
-            print("Opción inválida.")
+                if start < 0:
+                    print("Se ha llegado al inicio de la lista.")
+                    start = 0
+            elif opcion == 's':
+                break
+            else:
+                print("Opción inválida.")
 
-        if start == n:
-            start -= step
+            if start == n:
+                start -= step
+        else:
+            break
 
 def programa_main():
     print("\nGENERADOR DE VARIABLES ALEATORIAS")
