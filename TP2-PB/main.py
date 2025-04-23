@@ -168,7 +168,7 @@ def programa_main():
             print(f"\nSe generaron {len(numeros)} números con distribución Poisson con media {media:.2f}.")
 
             distribution = Poisson(media)
-            nombre_distribucion = f"normal P({media:.2f})"
+            nombre_distribucion = f"de poisson P({media:.2f})"
 
         if 1<= int(opcion) <=4:
             mostrar_numeros_interactivo(numeros, 100, 5)
